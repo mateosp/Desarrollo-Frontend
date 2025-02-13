@@ -1,0 +1,17 @@
+.contenedor-logo{
+    display: flex;
+}
+
+.git-img{
+    margin-top: 12px;
+    height: 40px;
+    width: 40px;
+}
+
+.messi-img{
+    width: 200px;
+}
+
+.title{
+    color: red;
+}
