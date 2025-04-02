@@ -10,9 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch("http://localhost:3000/tasks");
             const tasks = await res.json();
             
+            // Limpiar las listas solo una vez al inicio
             taskList.innerHTML = "";
             completedTaskList.innerHTML = "";
 
+            // Renderizar todas las tareas
             tasks.forEach(task => {
                 if (task.completed) {
                     renderTask(task, completedTaskList);
@@ -27,34 +29,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔹 Renderizar una tarea
     function renderTask(task, list) {
+        // Crear el elemento li
         const li = document.createElement("li");
         li.dataset.id = task.id;
         
-        li.innerHTML = `
-            <span class="task-text">${task.title}</span>
-            <input type="text" class="edit-input" value="${task.title}" style="display: none;">
-            ${task.completed ? "" : `<button class="complete-btn" data-id="${task.id}">✅</button>`}
-            <button class="save-btn" data-id="${task.id}" style="display: none;">💾</button>
-            <button class="delete-btn" data-id="${task.id}">❌</button>
-        `;
+        // Crear los elementos internos
+        const taskText = document.createElement("span");
+        taskText.className = "task-text";
+        taskText.textContent = task.title;
         
-        // Agregar event listeners directamente a los botones
-        const completeBtn = li.querySelector('.complete-btn');
-        if (completeBtn) {
+        const editInput = document.createElement("input");
+        editInput.type = "text";
+        editInput.className = "edit-input";
+        editInput.value = task.title;
+        editInput.style.display = "none";
+        
+        // Agregar los elementos al li
+        li.appendChild(taskText);
+        li.appendChild(editInput);
+        
+        // Agregar botones según el estado de la tarea
+        if (!task.completed) {
+            const completeBtn = document.createElement("button");
+            completeBtn.className = "complete-btn";
+            completeBtn.textContent = "✅";
             completeBtn.addEventListener('click', () => completeTask(task.id));
+            li.appendChild(completeBtn);
         }
         
-        const saveBtn = li.querySelector('.save-btn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => saveTask(task.id, saveBtn));
-        }
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "save-btn";
+        saveBtn.textContent = "💾";
+        saveBtn.style.display = "none";
+        saveBtn.addEventListener('click', () => saveTask(task.id, saveBtn));
+        li.appendChild(saveBtn);
         
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit-btn";
+        editBtn.textContent = "✏️";
+        editBtn.addEventListener('click', () => editTask(editBtn));
+        li.appendChild(editBtn);
         
-        const deleteBtn = li.querySelector('.delete-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => deleteTask(task.id));
-        }
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "❌";
+        deleteBtn.addEventListener('click', () => deleteTask(task.id));
+        li.appendChild(deleteBtn);
         
+        // Agregar el li a la lista
         list.appendChild(li);
     }
 
@@ -93,8 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 const taskElement = document.querySelector(`li[data-id="${id}"]`);
                 if (taskElement) {
-                    taskElement.remove();
+                    // Obtener la tarea actualizada del servidor
                     const task = await res.json();
+                    
+                    // Eliminar la tarea de la lista actual
+                    taskElement.remove();
+                    
+                    // Agregar la tarea a la lista de completadas
                     renderTask(task, completedTaskList);
                 }
             }
@@ -113,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 const taskElement = document.querySelector(`li[data-id="${id}"]`);
                 if (taskElement) {
+                    // Eliminar la tarea del DOM
                     taskElement.remove();
                 }
             }
@@ -140,8 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (res.ok) {
+                // Actualizar el texto de la tarea en el DOM
                 const taskText = li.querySelector(".task-text");
                 taskText.textContent = newTitle;
+                
+                // Ocultar el input y el botón de guardar
                 input.style.display = "none";
                 btn.style.display = "none";
                 
@@ -166,10 +197,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = li.querySelector(".edit-input");
         const saveBtn = li.querySelector(".save-btn");
 
+        // Ocultar el texto y mostrar el input
         taskText.style.display = "none";
         input.style.display = "block";
-        saveBtn.style.display = "inline-block";
+        
+        // Ocultar el botón de editar y mostrar el de guardar
         btn.style.display = "none";
+        saveBtn.style.display = "inline-block";
+        
+        // Enfocar el input
+        input.focus();
     }
 
     // Cargar tareas al iniciar
