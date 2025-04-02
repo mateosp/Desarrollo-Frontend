@@ -1,79 +1,191 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
 }
 
 .container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 450px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2d3748;
     text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+#task-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+#task-input {
+    flex: 1;
+    padding: 0.8rem 1.2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#task-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#task-form button {
+    padding: 0.8rem 1.5rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#task-form button:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
 }
 
 .task-sections {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.task-sections > div {
+    background: #f7fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 h2 {
-    font-size: 18px;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 ul {
     list-style: none;
-    padding: 0;
 }
 
 li {
-    background: #fff;
-    padding: 10px;
-    margin-top: 5px;
+    background: white;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .task-text {
     flex-grow: 1;
+    color: #4a5568;
+    font-size: 1rem;
 }
 
 .edit-input {
-    width: 60%;
+    width: 70%;
+    padding: 0.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
 }
 
 button {
-    padding: 5px;
-    cursor: pointer;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
-    margin-left: 5px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 0.5rem;
 }
 
 .complete-btn {
-    background-color: #28a745;
+    background-color: #48bb78;
     color: white;
+}
+
+.complete-btn:hover {
+    background-color: #38a169;
 }
 
 .delete-btn {
-    background-color: #dc3545;
+    background-color: #f56565;
     color: white;
+}
+
+.delete-btn:hover {
+    background-color: #e53e3e;
 }
 
 .edit-btn {
-    background-color: #007bff;
+    background-color: #4299e1;
     color: white;
 }
 
+.edit-btn:hover {
+    background-color: #3182ce;
+}
+
 .save-btn {
-    background-color: #ffc107;
-    color: black;
+    background-color: #ed8936;
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #dd6b20;
+}
+
+@media (max-width: 768px) {
+    .task-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    #task-form {
+        flex-direction: column;
+    }
+    
+    #task-form button {
+        width: 100%;
+    }
 }
