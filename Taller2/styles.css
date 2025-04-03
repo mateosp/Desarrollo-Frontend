@@ -172,6 +172,29 @@ button {
     background-color: #dd6b20;
 }
 
+.actions-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.delete-all-btn {
+    background-color: #e53e3e;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.delete-all-btn:hover {
+    background-color: #c53030;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 @media (max-width: 768px) {
     .task-sections {
         grid-template-columns: 1fr;

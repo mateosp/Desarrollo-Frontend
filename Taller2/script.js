@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskInput = document.getElementById("task-input");
     const taskList = document.getElementById("task-list");
     const completedTaskList = document.getElementById("completed-task-list");
+    const deleteAllBtn = document.getElementById("delete-all-btn");
 
     // 🔹 Cargar tareas al inicio
     async function loadTasks() {
@@ -128,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error al completar tarea:", error);
         }
+        loadTasks();
     }
 
     // 🔹 Eliminar tarea
@@ -147,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error al eliminar tarea:", error);
         }
+        loadTasks();
     }
 
     // 🔹 Guardar tarea editada
@@ -188,6 +191,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error al guardar tarea:", error);
         }
+
+        loadTasks();
     }
 
     // 🔹 Iniciar edición de tarea
@@ -208,6 +213,35 @@ document.addEventListener("DOMContentLoaded", () => {
         // Enfocar el input
         input.focus();
     }
+
+    // 🔹 Eliminar todas las tareas
+    deleteAllBtn.addEventListener("click", async () => {
+        // Confirmar antes de eliminar todas las tareas
+        if (confirm("¿Estás seguro de que deseas eliminar todas las tareas? Esta acción no se puede deshacer.")) {
+            try {
+                // Obtener todas las tareas
+                const res = await fetch("http://localhost:3000/tasks");
+                const tasks = await res.json();
+                
+                // Eliminar cada tarea
+                for (const task of tasks) {
+                    await fetch(`http://localhost:3000/tasks/${task.id}`, {
+                        method: "DELETE"
+                    });
+                }
+                
+                // Limpiar las listas en el DOM
+                taskList.innerHTML = "";
+                completedTaskList.innerHTML = "";
+                
+                // Mostrar mensaje de éxito
+                alert("Todas las tareas han sido eliminadas correctamente.");
+            } catch (error) {
+                console.error("Error al eliminar todas las tareas:", error);
+                alert("Hubo un error al eliminar todas las tareas. Por favor, intenta de nuevo.");
+            }
+        }
+    });
 
     // Cargar tareas al iniciar
     loadTasks();
