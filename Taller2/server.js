@@ -28,59 +28,70 @@ app.get("/", (req, res) => {
   res.send("Servidor corriendo...");
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
-
-
+// Obtener todas las tareas
 app.get("/tasks", (req, res) => {
     db.all("SELECT * FROM tasks", [], (err, rows) => {
       if (err) res.status(500).json({ error: err.message });
       else res.json(rows);
     });
-  });
+});
 
-  
+// Crear nueva tarea
 app.post("/tasks", (req, res) => {
     const { title } = req.body;
     db.run("INSERT INTO tasks (title) VALUES (?)", [title], function (err) {
       if (err) res.status(500).json({ error: err.message });
-      else res.json({ id: this.lastID, title, completed: 0 });
+      else {
+        // Devolver la tarea completa recién creada
+        db.get("SELECT * FROM tasks WHERE id = ?", [this.lastID], (err, row) => {
+          if (err) res.status(500).json({ error: err.message });
+          else res.json(row);
+        });
+      }
     });
 });
-  
 
+// Completar tarea
 app.put("/tasks/:id", (req, res) => {
     const { id } = req.params;
     db.run("UPDATE tasks SET completed = 1 WHERE id = ?", [id], function (err) {
       if (err) res.status(500).json({ error: err.message });
-      else res.json({ message: "Tarea completada" });
+      else {
+        // Devolver la tarea actualizada
+        db.get("SELECT * FROM tasks WHERE id = ?", [id], (err, row) => {
+          if (err) res.status(500).json({ error: err.message });
+          else res.json(row);
+        });
+      }
     });
 });
 
+// Eliminar tarea
 app.delete("/tasks/:id", (req, res) => {
     const { id } = req.params;
     db.run("DELETE FROM tasks WHERE id = ?", [id], function (err) {
       if (err) res.status(500).json({ error: err.message });
-      else res.json({ message: "Tarea eliminada" });
+      else res.json({ id: parseInt(id), deleted: true });
     });
 });
-  
 
-// PATCH para actualizar una tarea
-app.patch("/tasks/:id", async (req, res) => {
+// Actualizar título de tarea
+app.patch("/tasks/:id", (req, res) => {
     const { id } = req.params;
     const { title } = req.body;
-
-    const query = "UPDATE tasks SET title = ? WHERE id = ?";
-    const params = [title, id];
     
-    db.run(query, params, function (err) {
-        if (err) {
-            return res.status(500).json({ message: "Error al actualizar la tarea." });
-        }
-
-        // Si todo está bien, respondemos con el mensaje de éxito
-        res.status(200).json({ message: "Tarea actualizada correctamente" });
+    db.run("UPDATE tasks SET title = ? WHERE id = ?", [title, id], function (err) {
+      if (err) res.status(500).json({ error: err.message });
+      else {
+        // Devolver la tarea actualizada
+        db.get("SELECT * FROM tasks WHERE id = ?", [id], (err, row) => {
+          if (err) res.status(500).json({ error: err.message });
+          else res.json(row);
+        });
+      }
     });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

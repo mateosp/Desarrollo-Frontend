@@ -4,18 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskList = document.getElementById("task-list");
     const completedTaskList = document.getElementById("completed-task-list");
     const deleteAllBtn = document.getElementById("delete-all-btn");
-
+    const sortTasksBtn = document.getElementById("sort-tasks-btn");
+    
     // 🔹 Cargar tareas al inicio
     async function loadTasks() {
         try {
+            console.log("Intentando cargar tareas...");
             const res = await fetch("http://localhost:3000/tasks");
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const tasks = await res.json();
+            console.log("Tareas cargadas:", tasks);
             
-            // Limpiar las listas solo una vez al inicio
             taskList.innerHTML = "";
             completedTaskList.innerHTML = "";
 
-            // Renderizar todas las tareas
             tasks.forEach(task => {
                 if (task.completed) {
                     renderTask(task, completedTaskList);
@@ -25,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } catch (error) {
             console.error("Error al cargar tareas:", error);
+            alert("Error al cargar las tareas. Por favor, asegúrate de que el servidor esté corriendo en http://localhost:3000");
         }
     }
 
@@ -54,7 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const completeBtn = document.createElement("button");
             completeBtn.className = "complete-btn";
             completeBtn.textContent = "✅";
-            completeBtn.addEventListener('click', () => completeTask(task.id));
+            completeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                completeTask(task.id);
+            });
             li.appendChild(completeBtn);
         }
         
@@ -62,19 +70,28 @@ document.addEventListener("DOMContentLoaded", () => {
         saveBtn.className = "save-btn";
         saveBtn.textContent = "💾";
         saveBtn.style.display = "none";
-        saveBtn.addEventListener('click', () => saveTask(task.id, saveBtn));
+        saveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveTask(task.id, saveBtn);
+        });
         li.appendChild(saveBtn);
         
         const editBtn = document.createElement("button");
         editBtn.className = "edit-btn";
         editBtn.textContent = "✏️";
-        editBtn.addEventListener('click', () => editTask(editBtn));
+        editBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            editTask(editBtn);
+        });
         li.appendChild(editBtn);
         
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "delete-btn";
         deleteBtn.textContent = "❌";
-        deleteBtn.addEventListener('click', () => deleteTask(task.id));
+        deleteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            deleteTask(task.id);
+        });
         li.appendChild(deleteBtn);
         
         // Agregar el li a la lista
@@ -88,68 +105,75 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!title) return;
 
         try {
+            console.log("Intentando agregar tarea:", title);
             const res = await fetch("http://localhost:3000/tasks", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title })
             });
 
-            if (res.ok) {
-                const newTask = await res.json();
-                taskInput.value = "";
-                renderTask(newTask, taskList);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
             }
+
+            const newTask = await res.json();
+            console.log("Tarea agregada:", newTask);
+            taskInput.value = "";
+            renderTask(newTask, taskList);
         } catch (error) {
             console.error("Error al agregar tarea:", error);
+            alert("Error al agregar la tarea. Por favor, asegúrate de que el servidor esté corriendo en http://localhost:3000");
         }
     });
 
     // 🔹 Marcar como completada
     async function completeTask(id) {
         try {
+            console.log("Intentando completar tarea:", id);
             const res = await fetch(`http://localhost:3000/tasks/${id}`, { 
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ completed: true })
             });
 
-            if (res.ok) {
-                const taskElement = document.querySelector(`li[data-id="${id}"]`);
-                if (taskElement) {
-                    // Obtener la tarea actualizada del servidor
-                    const task = await res.json();
-                    
-                    // Eliminar la tarea de la lista actual
-                    taskElement.remove();
-                    
-                    // Agregar la tarea a la lista de completadas
-                    renderTask(task, completedTaskList);
-                }
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const taskElement = document.querySelector(`li[data-id="${id}"]`);
+            if (taskElement) {
+                taskElement.remove();
+                const task = await res.json();
+                console.log("Tarea completada:", task);
+                renderTask(task, completedTaskList);
             }
         } catch (error) {
             console.error("Error al completar tarea:", error);
+            alert("Error al completar la tarea. Por favor, asegúrate de que el servidor esté corriendo en http://localhost:3000");
         }
-        loadTasks();
     }
 
     // 🔹 Eliminar tarea
     async function deleteTask(id) {
         try {
+            console.log("Intentando eliminar tarea:", id);
             const res = await fetch(`http://localhost:3000/tasks/${id}`, { 
                 method: "DELETE" 
             });
 
-            if (res.ok) {
-                const taskElement = document.querySelector(`li[data-id="${id}"]`);
-                if (taskElement) {
-                    // Eliminar la tarea del DOM
-                    taskElement.remove();
-                }
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const taskElement = document.querySelector(`li[data-id="${id}"]`);
+            if (taskElement) {
+                taskElement.remove();
+                console.log("Tarea eliminada:", id);
             }
         } catch (error) {
             console.error("Error al eliminar tarea:", error);
+            alert("Error al eliminar la tarea. Por favor, asegúrate de que el servidor esté corriendo en http://localhost:3000");
         }
-        loadTasks();
     }
 
     // 🔹 Guardar tarea editada
@@ -164,35 +188,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
+            console.log("Intentando guardar tarea:", id, newTitle);
             const res = await fetch(`http://localhost:3000/tasks/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: newTitle })
             });
 
-            if (res.ok) {
-                // Actualizar el texto de la tarea en el DOM
-                const taskText = li.querySelector(".task-text");
-                taskText.textContent = newTitle;
-                
-                // Ocultar el input y el botón de guardar
-                input.style.display = "none";
-                btn.style.display = "none";
-                
-                // Mostrar el botón de editar nuevamente
-                const editBtn = li.querySelector(".edit-btn");
-                if (editBtn) {
-                    editBtn.style.display = "inline-block";
-                }
-            } else {
-                const error = await res.json();
-                alert(error.message || "Hubo un error al guardar la tarea");
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
             }
+
+            const taskText = li.querySelector(".task-text");
+            taskText.textContent = newTitle;
+            input.style.display = "none";
+            btn.style.display = "none";
+            const editBtn = li.querySelector(".edit-btn");
+            if (editBtn) {
+                editBtn.style.display = "inline-block";
+            }
+            console.log("Tarea guardada:", id, newTitle);
         } catch (error) {
             console.error("Error al guardar tarea:", error);
+            alert("Error al guardar la tarea. Por favor, asegúrate de que el servidor esté corriendo en http://localhost:3000");
         }
-
-        loadTasks();
     }
 
     // 🔹 Iniciar edición de tarea
@@ -202,45 +221,61 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = li.querySelector(".edit-input");
         const saveBtn = li.querySelector(".save-btn");
 
-        // Ocultar el texto y mostrar el input
         taskText.style.display = "none";
         input.style.display = "block";
-        
-        // Ocultar el botón de editar y mostrar el de guardar
         btn.style.display = "none";
         saveBtn.style.display = "inline-block";
-        
-        // Enfocar el input
         input.focus();
     }
 
     // 🔹 Eliminar todas las tareas
-    deleteAllBtn.addEventListener("click", async () => {
-        // Confirmar antes de eliminar todas las tareas
+    deleteAllBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
         if (confirm("¿Estás seguro de que deseas eliminar todas las tareas? Esta acción no se puede deshacer.")) {
             try {
-                // Obtener todas las tareas
                 const res = await fetch("http://localhost:3000/tasks");
                 const tasks = await res.json();
                 
-                // Eliminar cada tarea
                 for (const task of tasks) {
                     await fetch(`http://localhost:3000/tasks/${task.id}`, {
                         method: "DELETE"
                     });
                 }
                 
-                // Limpiar las listas en el DOM
                 taskList.innerHTML = "";
                 completedTaskList.innerHTML = "";
-                
-                // Mostrar mensaje de éxito
-                alert("Todas las tareas han sido eliminadas correctamente.");
             } catch (error) {
                 console.error("Error al eliminar todas las tareas:", error);
-                alert("Hubo un error al eliminar todas las tareas. Por favor, intenta de nuevo.");
             }
         }
+    });
+
+    sortTasksBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        // Obtener todas las tareas pendientes y completadas
+        const pendingTasks = Array.from(taskList.children);
+        const completedTasks = Array.from(completedTaskList.children);
+
+        // Función para ordenar tareas alfabéticamente
+        const sortTasksAlphabetically = (tasks) => {
+            return tasks.sort((a, b) => {
+                const textA = a.querySelector('.task-text').textContent.toLowerCase();
+                const textB = b.querySelector('.task-text').textContent.toLowerCase();
+                return textA.localeCompare(textB);
+            });
+        };
+
+        // Ordenar las tareas
+        const sortedPendingTasks = sortTasksAlphabetically(pendingTasks);
+        const sortedCompletedTasks = sortTasksAlphabetically(completedTasks);
+
+        // Limpiar las listas actuales
+        taskList.innerHTML = '';
+        completedTaskList.innerHTML = '';
+
+        // Agregar las tareas ordenadas de vuelta a las listas
+        sortedPendingTasks.forEach(task => taskList.appendChild(task));
+        sortedCompletedTasks.forEach(task => completedTaskList.appendChild(task));
     });
 
     // Cargar tareas al iniciar
